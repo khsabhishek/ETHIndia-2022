@@ -88,14 +88,17 @@ contract Cds_borrowing is SafeERC20{
 
         require(amount_deposited >= _amount, "amount is more than deposit amount"); // should have sufficient deposited amount to withdraw
 
-        uint256 amount_remaining = amount_deposited - _amount; // get the remaining amount after withdraw
-
         uint96 timestamp_at_index = cds_member_timestamp_with_index[msg.sender][_index]; // get timestamp at particular index
 
         uint96 expiration_time = timestamp_at_index + withdraw_time; // calculate expiration time
 
-        if(expiration_time <= block.timestamp) {
-            Trinity_token.transferFrom(address(this), msg.sender, _amount); // transfer amount to msg.sender
-        }
+        require(expiration_time <= block.timestamp, "more time to withdraw");
+
+        Trinity_token.transferFrom(address(this), msg.sender, _amount); // transfer amount to msg.sender
     }
+
+    function withdraw_fee(address _to, uint96 _amount) public {
+        require(_to != address(0), "address should'nt be zero address");
+        
+    } 
 }
