@@ -5,10 +5,6 @@ import "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 import "../interface/IUniswapV2Router02.sol";
 
 interface IERC20 {
-    function decimals() external view returns (uint8);
-
-    function totalSupply() external view returns (uint256);
-
     function mint(address to, uint256 amount) external;
 
     function balanceOf(address account) external view returns (uint256);
@@ -20,17 +16,13 @@ interface IERC20 {
     function approve(address spender, uint256 amount) external returns (bool);
 
     function transferFrom(address sender, address recipient, uint256 amount) external returns (bool);
-
-    event Transfer(address indexed from, address indexed to, uint256 value);
-
-    event Approval(address indexed owner, address indexed spender, uint256 value);
 }
 
 contract borrow_downside is IUniswapV2Router02{
 
     using SafeERC20 for IERC20;
 
-    IERC20 public immutable Trinity_token;
+    IERC20 public immutable synthetic_token;
 
     IUniswapV2Router02 UniswapV2Router02 = 0xb71c52BA5E0690A7cE3A0214391F4c03F5cbFB0d;
 
@@ -38,16 +30,26 @@ contract borrow_downside is IUniswapV2Router02{
     AggregatorV3Interface internal priceFeed_synthetic;
 
     constructor(address _synthetic_token) public {
-        Trinity_token = IERC20(_synthetic_token);
+        synthetic_token = IERC20(_synthetic_token);
     }
 
-    function split_amount(uint256 _amount) public {
+    function split_amount()public payable {
         require(_amount != 0, "amount incorrect");
 
-        amount_part1 = _amount / 2;
-        amount_part2 = _amount / 2;
+        _amount = msg.value;
 
-        require(Trinity_token.approve(address(UniswapV2Router02), amountIn), 'approve failed.');
+        uint96 amount_part1 = _amount / 2; // Will remain eth
+        uint96 amount_part2 = _amount / 2; // will convert to synthetic token
+
+        require(synthetic_token.approve(address(UniswapV2Router02), amountIn), 'approve failed.');
+
+        int deadline = block.timestamp + 100;
+        address[] memory path = new address[](2);
+        path[0] = ;
+        path[1] = address(target);
+
+        UniswapV2Router02.swapExactETHForTokens{value: amount_part2 }(0, path, to, deadline);
+
     } 
 
     function get_price_feed_Address_ETH(address _address) public {
