@@ -7,7 +7,7 @@ import "@openzeppelin/contracts@4.8.0/security/Pausable.sol";
 import "@openzeppelin/contracts@4.8.0/access/Ownable.sol";
 
 contract Test is ERC20, ERC20Burnable, Pausable, Ownable {
-    constructor() ERC20("Trinity", "TR") {}
+    constructor() ERC20("credit_default_swap", "cds") {}
 
     function pause() public onlyOwner {
         _pause();
