@@ -2,7 +2,6 @@ pragma solidity 0.8.9;
 
 import "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 
-import "../interface/IUniswapV2Router02.sol";
 
 interface IERC20 {
     function mint(address to, uint256 amount) external;
@@ -18,16 +17,27 @@ interface IERC20 {
     function transferFrom(address sender, address recipient, uint256 amount) external returns (bool);
 }
 
-contract borrow_downside is IUniswapV2Router02{
+interface IUniswap {
+    function swapExactETHForTokens(uint amountOutMin, address[] calldata path, address to, uint deadline)
+        external
+        payable
+        returns (uint[] memory amounts);
+    function WETH() external pure returns (address);
+}
+
+contract borrow_downside is IUniswap{
 
     using SafeERC20 for IERC20;
 
     IERC20 public immutable synthetic_token;
 
-    IUniswapV2Router02 UniswapV2Router02 = 0xb71c52BA5E0690A7cE3A0214391F4c03F5cbFB0d;
+    IUniswap UniswapV2Router02 = 0xb71c52BA5E0690A7cE3A0214391F4c03F5cbFB0d;
 
     AggregatorV3Interface internal priceFeed_ETH;
     AggregatorV3Interface internal priceFeed_synthetic;
+
+    bool short_trade = false;
+    bool long_trade = true;
 
     constructor(address _synthetic_token) public {
         synthetic_token = IERC20(_synthetic_token);
@@ -45,12 +55,16 @@ contract borrow_downside is IUniswapV2Router02{
 
         int deadline = block.timestamp + 100;
         address[] memory path = new address[](2);
-        path[0] = ;
-        path[1] = address(target);
+        path[0] = IUniswap.WETH();
+        path[1] = synthetic_tokenq;
 
-        UniswapV2Router02.swapExactETHForTokens{value: amount_part2 }(0, path, to, deadline);
+        UniswapV2Router02.swapExactETHForTokens{value: amount_part2 }(0, path, address(this), deadline);
 
     } 
+
+    function bid() public {
+        
+    }
 
     function get_price_feed_Address_ETH(address _address) public {
         priceFeed_ETH = AggregatorV3Interface(_address);
